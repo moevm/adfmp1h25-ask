@@ -42,7 +42,7 @@ fun DifficultySelectionScreen(
 
         // Title
         Text(
-            text = "Выберите сложность",
+            text = "Таблицы вопросов",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
