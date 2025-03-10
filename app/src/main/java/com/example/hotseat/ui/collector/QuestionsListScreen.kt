@@ -1,4 +1,4 @@
-package com.example.hotseat
+package com.example.hotseat.ui.collector
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
