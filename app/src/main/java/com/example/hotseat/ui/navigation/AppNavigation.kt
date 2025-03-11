@@ -4,10 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.hotseat.ui.collector.DifficultySelectionScreen
+import com.example.hotseat.ui.collector.DifficultySelectionScreen as CollectorDifficultyScreen
 import com.example.hotseat.ui.collector.QuestionsListScreen
 import com.example.hotseat.ui.collector.RatingsScreen
+import com.example.hotseat.ui.home.DifficultySelectionScreen as HomeDifficultyScreen
 import com.example.hotseat.ui.home.HomeScreen
+import com.example.hotseat.ui.home.PlayersSelectionScreen
 import com.example.hotseat.ui.questions.*
 
 @Composable
@@ -21,13 +23,14 @@ fun AppNavigation(
     ) {
         composable(NavRoutes.HOME) {
             HomeScreen(
-                onNavigateToRound = { navController.navigate(NavRoutes.ASK) },
-                onNavigateToDifficulty = { navController.navigate(NavRoutes.DIFFICULTY) }
+                onNavigateToRatings = { navController.navigate(NavRoutes.RATINGS) },
+                onNavigateToDifficulty = { navController.navigate(NavRoutes.DIFFICULTY) },
+                onNavigateToPlay = { navController.navigate(NavRoutes.HOME_DIFFICULTY) }
             )
         }
 
         composable(NavRoutes.DIFFICULTY) {
-            DifficultySelectionScreen(
+            CollectorDifficultyScreen(
                 onBackClick = { navController.popBackStack() },
                 onDifficultySelected = { navController.navigate(NavRoutes.QUESTIONS_LIST) }
             )
@@ -36,6 +39,25 @@ fun AppNavigation(
         composable(NavRoutes.QUESTIONS_LIST) {
             QuestionsListScreen(
                 onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(NavRoutes.HOME_DIFFICULTY) {
+            HomeDifficultyScreen(
+                onBackClick = { navController.popBackStack() },
+                onDifficultySelected = { difficulty -> 
+                    // Сохраняем выбранную сложность и переходим к выбору игроков
+                    navController.navigate(NavRoutes.PLAYERS_SELECTION)
+                }
+            )
+        }
+
+        composable(NavRoutes.PLAYERS_SELECTION) {
+            PlayersSelectionScreen(
+                onBackClick = { navController.popBackStack() },
+                onPlayClick = { players ->
+                    navController.navigate(NavRoutes.ASK)
+                }
             )
         }
 
