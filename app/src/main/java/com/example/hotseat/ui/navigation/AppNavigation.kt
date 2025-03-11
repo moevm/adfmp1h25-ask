@@ -45,9 +45,7 @@ fun AppNavigation(
         composable(NavRoutes.HOME_DIFFICULTY) {
             HomeDifficultyScreen(
                 onBackClick = { navController.popBackStack() },
-                onDifficultySelected = { difficulty -> 
-                    // Сохраняем выбранную сложность и переходим к выбору игроков
-                    navController.navigate(NavRoutes.PLAYERS_SELECTION)
+                onDifficultySelected = { difficulty -> navController.navigate(NavRoutes.PLAYERS_SELECTION)
                 }
             )
         }
