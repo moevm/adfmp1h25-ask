@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import com.example.hotseat.ui.collector.DifficultySelectionScreen as CollectorDifficultyScreen
 import com.example.hotseat.ui.collector.QuestionsListScreen
 import com.example.hotseat.ui.collector.RatingsScreen
+import com.example.hotseat.ui.home.AboutScreen
 import com.example.hotseat.ui.home.DifficultySelectionScreen as HomeDifficultyScreen
 import com.example.hotseat.ui.home.HomeScreen
 import com.example.hotseat.ui.home.PlayersSelectionScreen
@@ -25,7 +26,8 @@ fun AppNavigation(
             HomeScreen(
                 onNavigateToRatings = { navController.navigate(NavRoutes.RATINGS) },
                 onNavigateToDifficulty = { navController.navigate(NavRoutes.DIFFICULTY) },
-                onNavigateToPlay = { navController.navigate(NavRoutes.HOME_DIFFICULTY) }
+                onNavigateToPlay = { navController.navigate(NavRoutes.HOME_DIFFICULTY) },
+                onNavigateToAbout = { navController.navigate(NavRoutes.ABOUT) }
             )
         }
 
@@ -56,6 +58,12 @@ fun AppNavigation(
                 onPlayClick = { players ->
                     navController.navigate(NavRoutes.ASK)
                 }
+            )
+        }
+
+        composable(NavRoutes.ABOUT) {
+            AboutScreen(
+                onBackClick = { navController.popBackStack() }
             )
         }
 
