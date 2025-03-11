@@ -12,4 +12,5 @@ object NavRoutes {
     const val WINNER = "winner"
     const val HOME_DIFFICULTY = "home_difficulty"
     const val PLAYERS_SELECTION = "players_selection"
+    const val ABOUT = "about"
 } 
