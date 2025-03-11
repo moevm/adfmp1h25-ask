@@ -1,4 +1,4 @@
-package com.example.hotseat.ui.collector
+package com.example.hotseat.ui.home
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -19,7 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.hotseat.ui.components.DifficultySelectionComponent
+import com.example.hotseat.ui.components.DifficultyButtonsGroup
 import com.example.hotseat.ui.theme.HotseatTheme
 
 @Composable
@@ -37,7 +37,7 @@ fun DifficultySelectionScreen(
         Spacer(modifier = Modifier.height(50.dp))
 
         Text(
-            text = "Таблицы вопросов",
+            text = "Выберите сложность",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -46,7 +46,7 @@ fun DifficultySelectionScreen(
 
         Spacer(modifier = Modifier.height(80.dp))
 
-        com.example.hotseat.ui.components.DifficultyButtonsGroup(
+        DifficultyButtonsGroup(
             onDifficultySelected = onDifficultySelected
         )
 
@@ -78,4 +78,4 @@ fun DifficultySelectionScreenPreview() {
             onDifficultySelected = {}
         )
     }
-}
+} 
