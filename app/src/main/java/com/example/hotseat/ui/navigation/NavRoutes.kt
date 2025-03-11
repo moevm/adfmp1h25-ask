@@ -10,4 +10,6 @@ object NavRoutes {
     const val GUESS_ANSWER = "guess_answer"
     const val PASS_TURN = "pass_turn"
     const val WINNER = "winner"
+    const val HOME_DIFFICULTY = "home_difficulty"
+    const val PLAYERS_SELECTION = "players_selection"
 } 
