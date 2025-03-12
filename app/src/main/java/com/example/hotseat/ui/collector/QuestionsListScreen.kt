@@ -15,10 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
@@ -44,9 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hotseat.ui.theme.HotseatTheme
 import com.example.hotseat.ui.components.ConfirmationDialog
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.ImeAction
+import com.example.hotseat.ui.components.InputWithAddButton
 
 @Composable
 fun QuestionsListScreen(
@@ -134,65 +130,25 @@ fun QuestionsListScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         // Add new question field
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+        var newQuestion by remember { mutableStateOf("") }
+        InputWithAddButton(
+            value = newQuestion,
+            onValueChange = { newQuestion = it },
+            onAdd = {
+                // Create a truncated version for display in the list
+                val displayText = truncateText(newQuestion)
+
+                // Add the new question to the map
+                val updatedMap = questionsMapState.value.toMutableMap()
+                updatedMap[displayText] = newQuestion
+                questionsMapState.value = updatedMap
+
+                // Clear the input field after adding
+                newQuestion = ""
+            },
+            placeholder = "Введите свой вопрос",
             modifier = Modifier.fillMaxWidth()
-        ) {
-            var newQuestion by remember { mutableStateOf("") }
-            OutlinedTextField(
-                value = newQuestion,
-                onValueChange = { newQuestion = it },
-                placeholder = { Text("Введите свой вопрос") },
-                modifier = Modifier.weight(1f),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(
-                    onDone = {
-                        if (newQuestion.isNotBlank()) {val displayText = truncateText(newQuestion)
-
-                            val updatedMap = questionsMapState.value.toMutableMap()
-                            updatedMap[displayText] = newQuestion
-                            questionsMapState.value = updatedMap
-
-                             newQuestion = ""
-                        }
-                    }
-                ),
-                colors = TextFieldDefaults.colors(
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedContainerColor = Color.Transparent
-                )
-            )
-
-            // Add button
-            Box(
-                modifier = Modifier
-                    .padding(start = 8.dp)
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .clickable {
-                        if (newQuestion.isNotBlank()) {
-                            // Create a truncated version for display in the list
-                            val displayText = truncateText(newQuestion)
-
-                            // Add the new question to the map
-                            val updatedMap = questionsMapState.value.toMutableMap()
-                            updatedMap[displayText] = newQuestion
-                            questionsMapState.value = updatedMap
-
-                            // Clear the input field after adding
-                            newQuestion = ""
-                        }
-                    }
-                    .background(Color(0xFF2196F3)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add question",
-                    tint = Color.White
-                )
-            }
-        }
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
