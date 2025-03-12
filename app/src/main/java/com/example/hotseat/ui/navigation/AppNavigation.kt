@@ -2,8 +2,10 @@ package com.example.hotseat.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.hotseat.ui.collector.DifficultySelectionScreen as CollectorDifficultyScreen
 import com.example.hotseat.ui.collector.QuestionsListScreen
 import com.example.hotseat.ui.collector.RatingsScreen
@@ -12,6 +14,8 @@ import com.example.hotseat.ui.home.DifficultySelectionScreen as HomeDifficultySc
 import com.example.hotseat.ui.home.HomeScreen
 import com.example.hotseat.ui.home.PlayersSelectionScreen
 import com.example.hotseat.ui.questions.*
+import java.net.URLEncoder
+import java.net.URLDecoder
 
 @Composable
 fun AppNavigation(
@@ -34,12 +38,22 @@ fun AppNavigation(
         composable(NavRoutes.DIFFICULTY) {
             CollectorDifficultyScreen(
                 onBackClick = { navController.popBackStack() },
-                onDifficultySelected = { navController.navigate(NavRoutes.QUESTIONS_LIST) }
+                onDifficultySelected = { category ->
+                    val encodedCategory = URLEncoder.encode(category, "UTF-8")
+                    navController.navigate("${NavRoutes.QUESTIONS_LIST}/$encodedCategory")
+                }
             )
         }
 
-        composable(NavRoutes.QUESTIONS_LIST) {
+        composable(
+            route = "${NavRoutes.QUESTIONS_LIST}/{categoryName}",
+            arguments = listOf(navArgument("categoryName") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val encodedCategory = backStackEntry.arguments?.getString("categoryName") ?: ""
+            val categoryName = URLDecoder.decode(encodedCategory, "UTF-8")
+
             QuestionsListScreen(
+                categoryName = categoryName,
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -47,7 +61,8 @@ fun AppNavigation(
         composable(NavRoutes.HOME_DIFFICULTY) {
             HomeDifficultyScreen(
                 onBackClick = { navController.popBackStack() },
-                onDifficultySelected = { difficulty -> navController.navigate(NavRoutes.PLAYERS_SELECTION)
+                onDifficultySelected = { difficulty ->
+                    navController.navigate(NavRoutes.PLAYERS_SELECTION)
                 }
             )
         }
@@ -101,7 +116,7 @@ fun AppNavigation(
 
         composable(NavRoutes.WINNER) {
             WinnerScreen(
-                onPlayAgain = { 
+                onPlayAgain = {
                     navController.popBackStack(NavRoutes.HOME, inclusive = false)
                     navController.navigate(NavRoutes.ASK)
                 },
@@ -110,4 +125,4 @@ fun AppNavigation(
             )
         }
     }
-} 
+}
