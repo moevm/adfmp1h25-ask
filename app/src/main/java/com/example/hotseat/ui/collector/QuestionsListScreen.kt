@@ -15,10 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
@@ -43,6 +41,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hotseat.ui.theme.HotseatTheme
+import com.example.hotseat.ui.components.ConfirmationDialog
+import com.example.hotseat.ui.components.InputWithAddButton
 
 @Composable
 fun QuestionsListScreen(
@@ -130,52 +130,25 @@ fun QuestionsListScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         // Add new question field
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+        var newQuestion by remember { mutableStateOf("") }
+        InputWithAddButton(
+            value = newQuestion,
+            onValueChange = { newQuestion = it },
+            onAdd = {
+                // Create a truncated version for display in the list
+                val displayText = truncateText(newQuestion)
+
+                // Add the new question to the map
+                val updatedMap = questionsMapState.value.toMutableMap()
+                updatedMap[displayText] = newQuestion
+                questionsMapState.value = updatedMap
+
+                // Clear the input field after adding
+                newQuestion = ""
+            },
+            placeholder = "Введите свой вопрос",
             modifier = Modifier.fillMaxWidth()
-        ) {
-            var newQuestion by remember { mutableStateOf("") }
-            OutlinedTextField(
-                value = newQuestion,
-                onValueChange = { newQuestion = it },
-                placeholder = { Text("Введите свой вопрос") },
-                modifier = Modifier.weight(1f),
-                colors = TextFieldDefaults.colors(
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedContainerColor = Color.Transparent
-                )
-            )
-
-            // Add button
-            Box(
-                modifier = Modifier
-                    .padding(start = 8.dp)
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .clickable {
-                        if (newQuestion.isNotBlank()) {
-                            // Create a truncated version for display in the list
-                            val displayText = truncateText(newQuestion)
-
-                            // Add the new question to the map
-                            val updatedMap = questionsMapState.value.toMutableMap()
-                            updatedMap[displayText] = newQuestion
-                            questionsMapState.value = updatedMap
-
-                            // Clear the input field after adding
-                            newQuestion = ""
-                        }
-                    }
-                    .background(Color(0xFF2196F3)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add question",
-                    tint = Color.White
-                )
-            }
-        }
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -205,8 +178,11 @@ fun QuestionsListScreen(
 
     // Delete confirmation dialog
     if (showDeleteDialog && questionToDelete != null && deletionKey != null) {
-        DeleteConfirmationDialog(
-            questionText = questionToDelete!!,
+        ConfirmationDialog(
+            title = "Вы уверены, что хотите удалить этот вопрос?",
+            message = questionToDelete!!,
+            confirmButtonText = "Удалить",
+            dismissButtonText = "Отмена",
             onConfirm = {
                 // Actually delete the question from the map
                 val updatedMap = questionsMapState.value.toMutableMap()
@@ -317,72 +293,6 @@ fun QuestionDialog(
                 modifier = Modifier.width(120.dp)
             ) {
                 Text("Назад")
-            }
-        }
-    }
-}
-
-@Composable
-fun DeleteConfirmationDialog(
-    questionText: String,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0x80000000))
-            .clickable(onClick = onDismiss),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.White)
-                .clickable(onClick = {})
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "Вы уверены, что хотите удалить этот вопрос?",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text = questionText,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                textAlign = TextAlign.Center,
-                color = Color.Gray
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceEvenly
-            ) {
-                Button(
-                    onClick = onDismiss,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3)),
-                    modifier = Modifier.width(120.dp)
-                ) {
-                    Text("Отмена")
-                }
-
-                Button(
-                    onClick = onConfirm,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935)),
-                    modifier = Modifier.width(120.dp)
-                ) {
-                    Text("Удалить")
-                }
             }
         }
     }

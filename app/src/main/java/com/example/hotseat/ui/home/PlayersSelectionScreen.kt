@@ -1,7 +1,6 @@
 package com.example.hotseat.ui.home
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,21 +8,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,11 +27,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hotseat.ui.theme.HotseatTheme
+import com.example.hotseat.ui.components.ConfirmationDialog
+import com.example.hotseat.ui.components.InputWithAddButton
 
 @Composable
 fun PlayersSelectionScreen(
@@ -48,6 +41,9 @@ fun PlayersSelectionScreen(
 ) {
     val players = remember { mutableStateListOf("Игрок 1", "Игрок 2", "Игрок 3") }
     var newPlayerName by remember { mutableStateOf("") }
+
+    var playerToDelete by remember { mutableStateOf<String?>(null) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -70,44 +66,26 @@ fun PlayersSelectionScreen(
             items(players) { player ->
                 PlayerItem(
                     name = player,
-                    onDelete = { players.remove(player) }
+                    onDelete = {
+                        playerToDelete = player
+                        showDeleteDialog = true
+                    }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
 
-        OutlinedTextField(
+        InputWithAddButton(
             value = newPlayerName,
             onValueChange = { newPlayerName = it },
-            label = { Text("Введите имя нового игрока") },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    if (newPlayerName.isNotBlank()) {
-                        players.add(newPlayerName)
-                        newPlayerName = ""
-                    }
+            onAdd = {
+                if (newPlayerName.isNotBlank()) {
+                    players.add(newPlayerName)
+                    newPlayerName = ""
                 }
-            ),
-            trailingIcon = {
-                FloatingActionButton(
-                    onClick = {
-                        if (newPlayerName.isNotBlank()) {
-                            players.add(newPlayerName)
-                            newPlayerName = ""
-                        }
-                    },
-                    modifier = Modifier.width(40.dp).height(40.dp),
-                    containerColor = Color(0xFF2196F3)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Добавить игрока",
-                        tint = Color.White
-                    )
-                }
-            }
+            },
+            placeholder = "Введите имя нового игрока",
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -133,6 +111,24 @@ fun PlayersSelectionScreen(
                 Text("Играть")
             }
         }
+    }
+
+    if (showDeleteDialog && playerToDelete != null) {
+        ConfirmationDialog(
+            title = "Вы уверены, что хотите удалить этого игрока?",
+            message = playerToDelete!!,
+            confirmButtonText = "Удалить",
+            dismissButtonText = "Отмена",
+            onConfirm = {
+                players.remove(playerToDelete)
+                showDeleteDialog = false
+                playerToDelete = null
+            },
+            onDismiss = {
+                showDeleteDialog = false
+                playerToDelete = null
+            }
+        )
     }
 }
 
