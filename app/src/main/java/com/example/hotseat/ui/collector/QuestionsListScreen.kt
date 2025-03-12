@@ -44,6 +44,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hotseat.ui.theme.HotseatTheme
 import com.example.hotseat.ui.components.ConfirmationDialog
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
 
 @Composable
 fun QuestionsListScreen(
@@ -141,6 +144,19 @@ fun QuestionsListScreen(
                 onValueChange = { newQuestion = it },
                 placeholder = { Text("Введите свой вопрос") },
                 modifier = Modifier.weight(1f),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        if (newQuestion.isNotBlank()) {val displayText = truncateText(newQuestion)
+
+                            val updatedMap = questionsMapState.value.toMutableMap()
+                            updatedMap[displayText] = newQuestion
+                            questionsMapState.value = updatedMap
+
+                             newQuestion = ""
+                        }
+                    }
+                ),
                 colors = TextFieldDefaults.colors(
                     unfocusedContainerColor = Color.Transparent,
                     focusedContainerColor = Color.Transparent
