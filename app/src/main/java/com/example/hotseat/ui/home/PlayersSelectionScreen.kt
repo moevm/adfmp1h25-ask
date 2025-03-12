@@ -1,7 +1,6 @@
 package com.example.hotseat.ui.home
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -40,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hotseat.ui.theme.HotseatTheme
+import com.example.hotseat.ui.components.ConfirmationDialog
 
 @Composable
 fun PlayersSelectionScreen(
@@ -48,6 +47,9 @@ fun PlayersSelectionScreen(
 ) {
     val players = remember { mutableStateListOf("Игрок 1", "Игрок 2", "Игрок 3") }
     var newPlayerName by remember { mutableStateOf("") }
+
+    var playerToDelete by remember { mutableStateOf<String?>(null) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -70,7 +72,10 @@ fun PlayersSelectionScreen(
             items(players) { player ->
                 PlayerItem(
                     name = player,
-                    onDelete = { players.remove(player) }
+                    onDelete = {
+                        playerToDelete = player
+                        showDeleteDialog = true
+                    }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -133,6 +138,24 @@ fun PlayersSelectionScreen(
                 Text("Играть")
             }
         }
+    }
+
+    if (showDeleteDialog && playerToDelete != null) {
+        ConfirmationDialog(
+            title = "Вы уверены, что хотите удалить этого игрока?",
+            message = playerToDelete!!,
+            confirmButtonText = "Удалить",
+            dismissButtonText = "Отмена",
+            onConfirm = {
+                players.remove(playerToDelete)
+                showDeleteDialog = false
+                playerToDelete = null
+            },
+            onDismiss = {
+                showDeleteDialog = false
+                playerToDelete = null
+            }
+        )
     }
 }
 
