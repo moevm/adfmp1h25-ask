@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hotseat.ui.theme.HotseatTheme
+import com.example.hotseat.ui.components.ConfirmationDialog
 
 data class PlayerRating(
     val name: String,
@@ -131,7 +132,11 @@ fun RatingsScreen(
 
     // Reset confirmation dialog
     if (showResetDialog) {
-        ResetConfirmationDialog(
+        ConfirmationDialog(
+            title = "Вы уверены, что хотите сбросить таблицу лидеров?",
+            message = "Это действие нельзя отменить.",
+            confirmButtonText = "Сбросить",
+            dismissButtonText = "Отмена",
             onConfirm = {
                 // Actually reset the leaderboard by setting it to an empty list
                 playersState.value = emptyList()
@@ -140,71 +145,6 @@ fun RatingsScreen(
             },
             onDismiss = { showResetDialog = false }
         )
-    }
-}
-
-@Composable
-fun ResetConfirmationDialog(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0x80000000))
-            .clickable(onClick = onDismiss),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.White)
-                .clickable(onClick = {})  // Prevent click propagation
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "Вы уверены, что хотите сбросить таблицу лидеров?",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text = "Это действие нельзя отменить.",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                textAlign = TextAlign.Center,
-                color = Color.Gray
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Button(
-                    onClick = onDismiss,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3)),
-                    modifier = Modifier.width(120.dp)
-                ) {
-                    Text("Отмена")
-                }
-
-                Button(
-                    onClick = onConfirm,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935)),
-                    modifier = Modifier.width(120.dp)
-                ) {
-                    Text("Сбросить")
-                }
-            }
-        }
     }
 }
 
@@ -286,17 +226,6 @@ fun RatingsScreenPreview() {
         RatingsScreen(
             onBackClick = {},
             onResetClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ResetConfirmationDialogPreview() {
-    HotseatTheme {
-        ResetConfirmationDialog(
-            onConfirm = {},
-            onDismiss = {}
         )
     }
 }

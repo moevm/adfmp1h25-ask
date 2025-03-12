@@ -43,6 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hotseat.ui.theme.HotseatTheme
+import com.example.hotseat.ui.components.ConfirmationDialog
 
 @Composable
 fun QuestionsListScreen(
@@ -205,8 +206,11 @@ fun QuestionsListScreen(
 
     // Delete confirmation dialog
     if (showDeleteDialog && questionToDelete != null && deletionKey != null) {
-        DeleteConfirmationDialog(
-            questionText = questionToDelete!!,
+        ConfirmationDialog(
+            title = "Вы уверены, что хотите удалить этот вопрос?",
+            message = questionToDelete!!,
+            confirmButtonText = "Удалить",
+            dismissButtonText = "Отмена",
             onConfirm = {
                 // Actually delete the question from the map
                 val updatedMap = questionsMapState.value.toMutableMap()
@@ -317,72 +321,6 @@ fun QuestionDialog(
                 modifier = Modifier.width(120.dp)
             ) {
                 Text("Назад")
-            }
-        }
-    }
-}
-
-@Composable
-fun DeleteConfirmationDialog(
-    questionText: String,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0x80000000))
-            .clickable(onClick = onDismiss),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.White)
-                .clickable(onClick = {})
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "Вы уверены, что хотите удалить этот вопрос?",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text = questionText,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                textAlign = TextAlign.Center,
-                color = Color.Gray
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceEvenly
-            ) {
-                Button(
-                    onClick = onDismiss,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3)),
-                    modifier = Modifier.width(120.dp)
-                ) {
-                    Text("Отмена")
-                }
-
-                Button(
-                    onClick = onConfirm,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935)),
-                    modifier = Modifier.width(120.dp)
-                ) {
-                    Text("Удалить")
-                }
             }
         }
     }
