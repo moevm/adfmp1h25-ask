@@ -1,9 +1,6 @@
 package com.example.hotseat.ui.collector
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,21 +9,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -35,36 +25,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hotseat.ui.theme.HotseatTheme
 
-data class PlayerRating(
-    val name: String,
-    val wins: Int
-)
-
 @Composable
 fun RatingsScreen(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
     onResetClick: () -> Unit
 ) {
-    // State for reset confirmation dialog
-    var showResetDialog by remember { mutableStateOf(false) }
-
-    // Player ratings table with mutable state
-    val playersState = remember {
-        mutableStateOf(
-            listOf(
-                PlayerRating("Игрок 1", 10),
-                PlayerRating("Игрок 2", 9),
-                PlayerRating("Игрок 3", 8),
-                PlayerRating("Игрок 4", 7),
-                PlayerRating("Игрок 5", 6),
-                PlayerRating("Игрок 6", 5),
-                PlayerRating("Игрок 7", 4),
-                PlayerRating("Игрок 8", 3)
-            )
-        )
-    }
-
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -83,8 +49,19 @@ fun RatingsScreen(
         )
 
         // Player ratings table
+        val players = listOf(
+            PlayerRating("Игрок 1", 10),
+            PlayerRating("Игрок 2", 9),
+            PlayerRating("Игрок 3", 8),
+            PlayerRating("Игрок 4", 7),
+            PlayerRating("Игрок 5", 6),
+            PlayerRating("Игрок 6", 5),
+            PlayerRating("Игрок 7", 4),
+            PlayerRating("Игрок 8", 3)
+        )
+
         RatingsTable(
-            players = playersState.value,
+            players = players,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
@@ -112,9 +89,9 @@ fun RatingsScreen(
                 )
             }
 
-            // Reset button - now shows confirmation dialog
+            // Reset button
             Button(
-                onClick = { showResetDialog = true },
+                onClick = onResetClick,
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 8.dp),
@@ -128,85 +105,12 @@ fun RatingsScreen(
             }
         }
     }
-
-    // Reset confirmation dialog
-    if (showResetDialog) {
-        ResetConfirmationDialog(
-            onConfirm = {
-                // Actually reset the leaderboard by setting it to an empty list
-                playersState.value = emptyList()
-                onResetClick()
-                showResetDialog = false
-            },
-            onDismiss = { showResetDialog = false }
-        )
-    }
 }
 
-@Composable
-fun ResetConfirmationDialog(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0x80000000))
-            .clickable(onClick = onDismiss),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.White)
-                .clickable(onClick = {})  // Prevent click propagation
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "Вы уверены, что хотите сбросить таблицу лидеров?",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text = "Это действие нельзя отменить.",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                textAlign = TextAlign.Center,
-                color = Color.Gray
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Button(
-                    onClick = onDismiss,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3)),
-                    modifier = Modifier.width(120.dp)
-                ) {
-                    Text("Отмена")
-                }
-
-                Button(
-                    onClick = onConfirm,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935)),
-                    modifier = Modifier.width(120.dp)
-                ) {
-                    Text("Сбросить")
-                }
-            }
-        }
-    }
-}
+data class PlayerRating(
+    val name: String,
+    val wins: Int
+)
 
 @Composable
 fun RatingsTable(
@@ -286,17 +190,6 @@ fun RatingsScreenPreview() {
         RatingsScreen(
             onBackClick = {},
             onResetClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ResetConfirmationDialogPreview() {
-    HotseatTheme {
-        ResetConfirmationDialog(
-            onConfirm = {},
-            onDismiss = {}
         )
     }
 }
