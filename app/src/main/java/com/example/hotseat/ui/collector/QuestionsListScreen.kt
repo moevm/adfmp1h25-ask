@@ -26,7 +26,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -47,6 +46,7 @@ import com.example.hotseat.ui.theme.HotseatTheme
 
 @Composable
 fun QuestionsListScreen(
+    categoryName: String,
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit
 ) {
@@ -54,15 +54,42 @@ fun QuestionsListScreen(
     var selectedQuestion by remember { mutableStateOf<String?>(null) }
     var showDialog by remember { mutableStateOf(false) }
 
+    // State for delete confirmation dialog
+    var questionToDelete by remember { mutableStateOf<String?>(null) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var deletionKey by remember { mutableStateOf<String?>(null) }
+
+    // Helper function to truncate text for display in list
+    fun truncateText(text: String, maxLength: Int = 30): String {
+        return if (text.length <= maxLength) text
+        else text.take(maxLength) + "..."
+    }
+
+    // Mutable state for questions with full text mapping
+    val questionsMapState = remember {
+        mutableStateOf(
+            mutableMapOf(
+                "Lorem ipsum dolor sit amet, cons..." to "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore",
+                "Вопрос 1" to "Вопрос 1 полный текст",
+                "Вопрос 2" to "Вопрос 2 полный текст",
+                "Вопрос 3" to "Вопрос 3 полный текст",
+                "Вопрос 4" to "Вопрос 4 полный текст",
+                "Вопрос 5" to "Вопрос 5 полный текст",
+                "Вопрос 6" to "Вопрос 6 полный текст",
+                "Вопрос 7" to "Вопрос 7 полный текст"
+            )
+        )
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Title
+        // Title with category name
         Text(
-            text = "Список вопросов",
+            text = "Список вопросов: $categoryName",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -76,32 +103,23 @@ fun QuestionsListScreen(
         SearchField(
             value = searchText,
             onValueChange = { searchText = it },
-            placeholder = "Введите свой вопрос",
+            placeholder = "Поиск вопроса",
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Sample list of questions with full text mapping
-        val questionsMap = remember {
-            mapOf(
-                "Lorem ipsum dolor sit amet, cons..." to "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore",
-                "Вопрос 1" to "Вопрос 1 полный текст",
-                "Вопрос 2" to "Вопрос 2 полный текст",
-                "Вопрос 3" to "Вопрос 3 полный текст",
-                "Вопрос 4" to "Вопрос 4 полный текст",
-                "Вопрос 5" to "Вопрос 5 полный текст",
-                "Вопрос 6" to "Вопрос 6 полный текст",
-                "Вопрос 7" to "Вопрос 7 полный текст"
-            )
-        }
-
         // List of questions with delete buttons
         QuestionsList(
-            questions = questionsMap.keys.toList(),
-            onDeleteQuestion = { /* Handle delete */ },
+            questions = questionsMapState.value.keys.toList(),
+            onDeleteQuestion = { question ->
+                // Store both the display key and full text for deletion
+                questionToDelete = questionsMapState.value[question]
+                deletionKey = question
+                showDeleteDialog = true
+            },
             onQuestionClick = { question ->
-                selectedQuestion = questionsMap[question]
+                selectedQuestion = questionsMapState.value[question]
                 showDialog = true
             },
             modifier = Modifier
@@ -134,7 +152,20 @@ fun QuestionsListScreen(
                     .padding(start = 8.dp)
                     .size(48.dp)
                     .clip(CircleShape)
-                    .clickable { /* Handle add */ }
+                    .clickable {
+                        if (newQuestion.isNotBlank()) {
+                            // Create a truncated version for display in the list
+                            val displayText = truncateText(newQuestion)
+
+                            // Add the new question to the map
+                            val updatedMap = questionsMapState.value.toMutableMap()
+                            updatedMap[displayText] = newQuestion
+                            questionsMapState.value = updatedMap
+
+                            // Clear the input field after adding
+                            newQuestion = ""
+                        }
+                    }
                     .background(Color(0xFF2196F3)),
                 contentAlignment = Alignment.Center
             ) {
@@ -169,6 +200,30 @@ fun QuestionsListScreen(
         QuestionDialog(
             text = selectedQuestion!!,
             onDismiss = { showDialog = false }
+        )
+    }
+
+    // Delete confirmation dialog
+    if (showDeleteDialog && questionToDelete != null && deletionKey != null) {
+        DeleteConfirmationDialog(
+            questionText = questionToDelete!!,
+            onConfirm = {
+                // Actually delete the question from the map
+                val updatedMap = questionsMapState.value.toMutableMap()
+                updatedMap.remove(deletionKey)
+                questionsMapState.value = updatedMap
+
+                // Reset dialog state
+                showDeleteDialog = false
+                questionToDelete = null
+                deletionKey = null
+            },
+            onDismiss = {
+                // Reset dialog state
+                showDeleteDialog = false
+                questionToDelete = null
+                deletionKey = null
+            }
         )
     }
 }
@@ -268,6 +323,72 @@ fun QuestionDialog(
 }
 
 @Composable
+fun DeleteConfirmationDialog(
+    questionText: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0x80000000))
+            .clickable(onClick = onDismiss),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .clip(RoundedCornerShape(8.dp))
+                .background(Color.White)
+                .clickable(onClick = {})
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Вы уверены, что хотите удалить этот вопрос?",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold
+            )
+
+            Text(
+                text = questionText,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                textAlign = TextAlign.Center,
+                color = Color.Gray
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceEvenly
+            ) {
+                Button(
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3)),
+                    modifier = Modifier.width(120.dp)
+                ) {
+                    Text("Отмена")
+                }
+
+                Button(
+                    onClick = onConfirm,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935)),
+                    modifier = Modifier.width(120.dp)
+                ) {
+                    Text("Удалить")
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun SearchField(
     value: String,
     onValueChange: (String) -> Unit,
@@ -300,46 +421,8 @@ fun SearchField(
 fun QuestionsListScreenPreview() {
     HotseatTheme {
         QuestionsListScreen(
+            categoryName = "Едва знакомы",
             onBackClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun QuestionItemPreview() {
-    HotseatTheme {
-        QuestionItem(
-            text = "Lorem ipsum dolor sit amet",
-            onDelete = {},
-            onClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun QuestionsListPreview() {
-    HotseatTheme {
-        QuestionsList(
-            questions = listOf(
-                "Question 1",
-                "Question 2",
-                "Question 3"
-            ),
-            onDeleteQuestion = {},
-            onQuestionClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun QuestionDialogPreview() {
-    HotseatTheme {
-        QuestionDialog(
-            text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore",
-            onDismiss = {}
         )
     }
 }
